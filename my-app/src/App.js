@@ -1,86 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './App.css';  // Ensure your App.css is correctly imported
+import React, { useState } from 'react';
+import './styles.css';
+import Dropdown from './Dropdown';
 
 function App() {
-    const [data, setData] = useState('');
-    const [filter, setFilter] = useState([]);
+    const [jsonData, setJsonData] = useState('');
     const [response, setResponse] = useState(null);
-    const [dropdownOptions, setDropdownOptions] = useState([]);
-
-    // Set the document title to your roll number
-    useEffect(() => {
-        document.title = "ABCD123"; // Replace with your actual roll number
-    }, []);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const jsonData = JSON.parse(data);
-            const result = await axios.post('http://127.0.0.1:8000/bfhl', jsonData);
-
-            const options = [];
-            if (result.data.numbers.length > 0) options.push("Numbers");
-            if (result.data.alphabets.length > 0) options.push("Alphabets");
-            if (result.data.highest_lowercase_alphabet) options.push("Highest Lowercase Alphabet");
-
-            setDropdownOptions(options);
-            setResponse(result.data);
-
-        } catch (err) {
-            console.error("Error submitting data", err);
+            const res = await fetch('http://127.0.0.1:8000/bfhl', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ data: jsonData.split(',') }),
+            });
+            const result = await res.json();
+            setResponse(result);
+            setDropdownVisible(true);
+        } catch (error) {
+            console.error('Error:', error);
         }
     };
 
-    const renderFilteredResponse = () => {
-        if (!response) return null;
-
-        const filteredResponse = {};
-        if (filter.includes("Numbers")) {
-            filteredResponse.numbers = response.numbers.join(',');
+    const handleFilter = async (selectedFilters) => {
+        try {
+            const res = await fetch('http://127.0.0.1:8000/bfhl', {
+                method: 'GET',
+            });
+            const result = await res.json();
+            let filteredResponse = {};
+            selectedFilters.forEach(filter => {
+                filteredResponse[filter] = result[filter];
+            });
+            setResponse(filteredResponse);
+        } catch (error) {
+            console.error('Error:', error);
         }
-        if (filter.includes("Alphabets")) {
-            filteredResponse.alphabets = response.alphabets.join(',');
-        }
-        if (filter.includes("Highest Lowercase Alphabet")) {
-            filteredResponse.highest_lowercase_alphabet = response.highest_lowercase_alphabet;
-        }
-
-        return (
-            <pre>{JSON.stringify(filteredResponse, null, 2)}</pre>
-        );
     };
 
     return (
-        <div className="App">
-            <h1>Sample Output</h1>
+        <div className="container">
+            <h1>JSON Data Submission</h1>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label>API Input</label>
-                    <textarea
-                        value={data}
-                        onChange={(e) => setData(e.target.value)}
-                        placeholder='{"data":["M","1","334","4","B"]}'
-                    />
-                </div>
-                <div>
-                    <button type="submit">Submit</button>
-                </div>
+                <label htmlFor="jsonData">Enter JSON Data (comma separated):</label>
+                <textarea
+                    id="jsonData"
+                    rows="4"
+                    cols="50"
+                    value={jsonData}
+                    onChange={(e) => setJsonData(e.target.value)}
+                ></textarea>
+                <button type="submit">Submit</button>
             </form>
+
+            {dropdownVisible && (
+                <Dropdown onFilterSelect={handleFilter} />
+            )}
+
             {response && (
-                <div>
-                    <label>Multi Filter</label>
-                    <select multiple={true} value={filter} onChange={(e) => setFilter([...e.target.selectedOptions].map(o => o.value))}>
-                        {dropdownOptions.map(option => (
-                            <option key={option} value={option}>{option}</option>
-                        ))}
-                    </select>
+                <div id="responseSection">
+                    <h2>Filtered Response:</h2>
+                    <pre id="responseData">{JSON.stringify(response, null, 2)}</pre>
                 </div>
             )}
-            <div>
-                <h3>Filtered Response</h3>
-                {renderFilteredResponse()}
-            </div>
         </div>
     );
 }
