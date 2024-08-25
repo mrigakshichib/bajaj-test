@@ -12,7 +12,7 @@ function App() {
         e.preventDefault();
         try {
             const parsedData = JSON.parse(jsonData);
-            const res = await fetch('http://127.0.0.1:8000/bfhl', {
+            const res = await fetch('https://your-vercel-project-url.vercel.app/api/bfhl', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
