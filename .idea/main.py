@@ -1,16 +1,24 @@
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Union
+from fastapi.middleware.cors import CORSMiddleware
 import re
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Adjust the frontend URL if needed
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class PostRequest(BaseModel):
     data: List[Union[str, int]]
 
 @app.post("/bfhl")
 def process_data(request: PostRequest):
-    # Mock user data, replace with real values in a real application
     user_id = "john_doe_17091999"
     email = "john@xyz.com"
     roll_number = "ABCD123"
@@ -35,3 +43,7 @@ def process_data(request: PostRequest):
 @app.get("/bfhl")
 def get_operation_code():
     return {"operation_code": 1}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
