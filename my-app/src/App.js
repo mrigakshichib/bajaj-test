@@ -10,12 +10,13 @@ function App() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const parsedData = JSON.parse(jsonData);
             const res = await fetch('http://127.0.0.1:8000/bfhl', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ data: jsonData.split(',') }),
+                body: JSON.stringify(parsedData),
             });
             const result = await res.json();
             setResponse(result);
@@ -25,20 +26,22 @@ function App() {
         }
     };
 
-    const handleFilter = async (selectedFilters) => {
-        try {
-            const res = await fetch('http://127.0.0.1:8000/bfhl', {
-                method: 'GET',
-            });
-            const result = await res.json();
-            let filteredResponse = {};
-            selectedFilters.forEach(filter => {
-                filteredResponse[filter] = result[filter];
-            });
-            setResponse(filteredResponse);
-        } catch (error) {
-            console.error('Error:', error);
-        }
+    const handleFilter = (selectedFilters) => {
+        if (!response) return;
+
+        const filteredResponse = {};
+
+        selectedFilters.forEach((filter) => {
+            if (filter === 'numbers') {
+                filteredResponse.numbers = response.numbers;
+            } else if (filter === 'alphabets') {
+                filteredResponse.alphabets = response.alphabets;
+            } else if (filter === 'highest_lowercase_alphabet') {
+                filteredResponse.highest_lowercase_alphabet = response.highest_lowercase_alphabet;
+            }
+        });
+
+        setResponse(filteredResponse);
     };
 
     return (
