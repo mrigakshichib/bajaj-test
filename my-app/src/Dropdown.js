@@ -1,32 +1,28 @@
 import React, { useState } from 'react';
 
 function Dropdown({ onFilterSelect }) {
-    const [selectedOptions, setSelectedOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState('');
 
     const handleChange = (e) => {
-        const { options } = e.target;
-        const selected = [];
-        for (let i = 0, l = options.length; i < l; i++) {
-            if (options[i].selected) {
-                selected.push(options[i].value);
-            }
-        }
-        setSelectedOptions(selected);
+        setSelectedOption(e.target.value);
     };
 
     const handleClick = () => {
-        onFilterSelect(selectedOptions);
+        if (selectedOption) {
+            onFilterSelect([selectedOption]); // Wrap the single selected option in an array
+        }
     };
 
     return (
         <div id="dropdownSection">
             <h2>Select Data to Filter:</h2>
-            <select multiple onChange={handleChange}>
+            <select onChange={handleChange} value={selectedOption}>
+                <option value="">-- Select an option --</option>
                 <option value="numbers">Numbers</option>
                 <option value="alphabets">Alphabets</option>
                 <option value="highest_lowercase_alphabet">Highest Lowercase Alphabet</option>
             </select>
-            <button onClick={handleClick}>Filter Data</button>
+            <button onClick={handleClick} disabled={!selectedOption}>Filter Data</button>
         </div>
     );
 }

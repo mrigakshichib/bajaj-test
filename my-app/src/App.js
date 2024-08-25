@@ -4,7 +4,8 @@ import Dropdown from './Dropdown';
 
 function App() {
     const [jsonData, setJsonData] = useState('');
-    const [response, setResponse] = useState(null);
+    const [originalResponse, setOriginalResponse] = useState(null); // Keep the original response
+    const [filteredResponse, setFilteredResponse] = useState(null); // Keep the filtered response
     const [dropdownVisible, setDropdownVisible] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -19,7 +20,8 @@ function App() {
                 body: JSON.stringify(parsedData),
             });
             const result = await res.json();
-            setResponse(result);
+            setOriginalResponse(result); // Store the original response
+            setFilteredResponse(result); // Initially, set the filtered response to the full response
             setDropdownVisible(true);
         } catch (error) {
             console.error('Error:', error);
@@ -27,21 +29,21 @@ function App() {
     };
 
     const handleFilter = (selectedFilters) => {
-        if (!response) return;
+        if (!originalResponse) return;
 
         const filteredResponse = {};
 
         selectedFilters.forEach((filter) => {
-            if (filter === 'numbers') {
-                filteredResponse.numbers = response.numbers;
-            } else if (filter === 'alphabets') {
-                filteredResponse.alphabets = response.alphabets;
-            } else if (filter === 'highest_lowercase_alphabet') {
-                filteredResponse.highest_lowercase_alphabet = response.highest_lowercase_alphabet;
+            if (filter === 'numbers' && originalResponse.numbers) {
+                filteredResponse.numbers = originalResponse.numbers;
+            } else if (filter === 'alphabets' && originalResponse.alphabets) {
+                filteredResponse.alphabets = originalResponse.alphabets;
+            } else if (filter === 'highest_lowercase_alphabet' && originalResponse.highest_lowercase_alphabet) {
+                filteredResponse.highest_lowercase_alphabet = originalResponse.highest_lowercase_alphabet;
             }
         });
 
-        setResponse(filteredResponse);
+        setFilteredResponse(filteredResponse);
     };
 
     return (
@@ -63,10 +65,10 @@ function App() {
                 <Dropdown onFilterSelect={handleFilter} />
             )}
 
-            {response && (
+            {filteredResponse && (
                 <div id="responseSection">
                     <h2>Filtered Response:</h2>
-                    <pre id="responseData">{JSON.stringify(response, null, 2)}</pre>
+                    <pre id="responseData">{JSON.stringify(filteredResponse, null, 2)}</pre>
                 </div>
             )}
         </div>
