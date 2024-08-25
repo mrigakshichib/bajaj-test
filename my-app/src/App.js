@@ -12,7 +12,7 @@ function App() {
         e.preventDefault();
         try {
             const parsedData = JSON.parse(jsonData);
-            const res = await fetch('https://bajaj-test-backend.vercel.app/api/bfhl', {
+            const res = await fetch('https://bajaj-test-be-21bce10424/api/bfhl', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
